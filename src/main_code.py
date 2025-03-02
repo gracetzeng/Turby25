@@ -73,6 +73,19 @@ def main():
             move_forward_until_distance(target_distance=10, speed=100)  # Move forward using sonar
             break
 
+        if ball detected:
+            print("Blue ball detected! Stopping...")
+            stop movement()
+            sonar leds.left.setPixelColor(0x00FF00) # Set LEDs to green
+            sonar leds.right.setPixelColor(0x00FF00)
+            time.sleep(0.4)
+            
+            move forward until distance(target distance=10, speed=100) # Move forward using sonar
+            sonar leds.left.setPixelColor(OxFF0000) #Set LEDs back to red
+            sonar_leds.right.setPixelColor(OxFF0000)
+            break
+
+
         # Exit loop on 'q' key press
         if cv2.waitKey(1) & 0xFF == ord('q'):
             print("Exit key pressed. Stopping...")
