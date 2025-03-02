@@ -1,3 +1,21 @@
+import cv2
+import numpy as np
+
+class CameraProcessor:
+    def __init__(self):
+        self.cap = cv2.VideoCapture(0)
+        if not self.cap.isOpened():
+            print("Error: Unable to access camera.")
+            exit(1)
+
+    def get_frame(self):
+        """Captures a single frame from the camera."""
+        ret, frame = self.cap.read()
+        if not ret:
+            print("Error: Failed to grab frame.")
+            return None
+        return frame
+    
     def detect_blue_ball(self, frame):
         # Convert the image from BGR to HSV color space
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
