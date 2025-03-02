@@ -3,49 +3,46 @@ import numpy as np
 
 class CameraProcessor:
     def __init__(self):
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(0)  # Use the default camera
         if not self.cap.isOpened():
-            print("Error: Unable to access camera.")
-            exit(1)
+            print("Error: Could not open camera.")
+            exit()
 
     def get_frame(self):
-        """Captures a single frame from the camera."""
         ret, frame = self.cap.read()
         if not ret:
-            print("Error: Failed to grab frame.")
             return None
         return frame
-    
+
     def detect_blue_ball(self, frame):
-        # Convert the image from BGR to HSV color space
+        """Detects a blue ball in the provided frame."""
+        # Convert the frame from BGR to HSV
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        # Define lower and upper bound on blue color
-        lower_blue = np.array([100, 150, 150])
-        upper_blue = np.array([140, 255, 255])
+        # Define the range of blue color in HSV
+        lower_blue = np.array([100, 150, 50])  # Lower bound of blue
+        upper_blue = np.array([140, 255, 255])  # Upper bound of blue
 
-        # Create a mask to isolate the blue areas
+        # Threshold the HSV image to get only blue colors
         mask = cv2.inRange(hsv, lower_blue, upper_blue)
+
+        # Bitwise-AND the mask and the original image
+        result = cv2.bitwise_and(frame, frame, mask=mask)
 
         # Find contours in the mask
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
+
         ball_detected = False
-        if contours:
-            # Find the largest contour (hopefully the ball)
-            largest_contour = max(contours, key=cv2.contourArea)
-
-            # Get the bounding box of the largest contour
-            x, y, w, h = cv2.boundingRect(largest_contour)
-
-            # If the size of the detected contour is significant, consider it a ball
-            if w * h > 100:  # Threshold area to avoid false positives
+        for contour in contours:
+            if cv2.contourArea(contour) > 100:  # Minimum contour area to detect a ball
                 ball_detected = True
-                # Draw a bounding box around the detected ball
+                # Get the bounding box of the contour
+                x, y, w, h = cv2.boundingRect(contour)
+                # Draw the rectangle around the detected ball
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-        # Return the processed frame and ball detection status
         return frame, ball_detected
 
     def release(self):
+        """Releases the camera resource."""
         self.cap.release()
